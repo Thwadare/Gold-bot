@@ -1,0 +1,78 @@
+# a trading bot for gold with 1 percent risk on equity and takes unlimited trades
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define Strategy (ICT Sniper Entry)
+def ict_sniper_strategy(data):
+    # Example strategy: Buy at support, sell at resistance
+    data['Support'] = data['Low'].rolling(window=20).min()
+    data['Resistance'] = data['High'].rolling(window=20).max()
+    data['Signal'] = np.where(data['Close'] >= data['Resistance'], -1, np.where(data['Close'] <= data['Support'], 1, 0))
+    return data['Signal']
+
+# Backtesting
+def backtest(data, signal):
+    data['Returns'] = data['Close'].pct_change()
+    data['Strategy_Returns'] = data['Returns'] * signal.shift(1)
+    return data['Strategy_Returns'].dropna()
+
+# Risk Management (position sizing and stop-loss)
+def position_size(capital, risk_pct, stop_loss_pct):
+    return (capital * risk_pct) / stop_loss_pct
+
+# Automation (connecting to broker API, executing trades)
+def execute_trades(signal):
+    # Code to connect to broker API and execute trades based on signal
+    pass
+
+# Continuous Optimization (Feedback Loop)
+def continuous_optimization(data, signal):
+    # Analyze performance metrics
+    win_rate = (signal > 0).mean()
+    average_return = data['Strategy_Returns'].mean()
+    
+    # Adjust parameters based on performance
+    if win_rate < 0.6:
+        # Adjust strategy parameters to increase win rate
+        pass
+    elif average_return < 0:
+        # Adjust risk management parameters to reduce losses
+        pass
+    else:
+        # Strategy is performing well, no adjustments needed
+        pass
+
+# Compliance and Regulation
+def compliance_check():
+    # Code to ensure compliance with regulations
+    pass
+
+# Example usage:
+# Load historical data
+data = pd.read_csv('gold_price_data.csv')
+
+# Apply strategy
+signal = ict_sniper_strategy(data)
+
+# Backtest strategy
+returns = backtest(data, signal)
+
+# Calculate position size
+capital = 10000  # Example initial capital
+risk_pct = 0.01  # Risk 1% per trade
+stop_loss_pct = 0.05  # Example stop loss at 5%
+position_size = position_size(capital, risk_pct, stop_loss_pct)
+
+# Execute trades
+execute_trades(signal)
+
+# Continuous Optimization
+continuous_optimization(data, signal)
+
+# Plot results
+plt.plot(returns.cumsum())
+plt.title('Cumulative Returns')
+plt.xlabel('Trades')
+plt.ylabel('Cumulative Returns')
+plt.show()
